@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dump">
+  <meta name="theme-color" content="#0e0e12">
+  <title>Dump</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Home: DUMP is a cloud; DO / DEFER / DELEGATE are checklists -->
+  <header class="top">
+    <button class="listbtn" id="listBtn" aria-label="Switch list">
+      <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span id="listName">DUMP</span><span class="count" id="count"></span>
+    </button>
+    <div class="topright">
+      <button class="procbtn" id="procBtn">PROCESS <span id="procCount"></span></button>
+      <button class="iconbtn" id="menuBtn" aria-label="Export and settings">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="scroller" id="scroller">
+    <main id="cloud" class="cloud" aria-live="polite"></main>
+    <ol id="checklist" class="checklist" hidden></ol>
+  </div>
+  <p class="empty" id="empty" hidden></p>
+
+  <button class="orb" id="orb" aria-label="Dump a thought"><span>+</span></button>
+
+  <!-- Capture: full screen, big type -->
+  <section class="capture" id="capture" hidden>
+    <div class="capbar">
+      <button class="textbtn" id="capCancel">Cancel</button>
+      <button class="dumpbtn" id="capDump" disabled>Dump</button>
+    </div>
+    <textarea id="capText" placeholder="What's on your mind?" rows="1"
+      enterkeyhint="done" autocapitalize="sentences" autocomplete="off"></textarea>
+  </section>
+
+  <!-- List switcher (top left) -->
+  <dialog class="drop" id="lists">
+    <button data-list="dump">DUMP<span></span></button>
+    <button data-list="do">DO<span></span></button>
+    <button data-list="defer">DEFER<span></span></button>
+    <button data-list="delegate">DELEGATE<span></span></button>
+  </dialog>
+
+  <!-- Export / clear / restore (gear, top right) -->
+  <dialog class="sheet" id="menu">
+    <button data-act="export">EXPORT LISTS<small>Dump, do, defer and delegate as one JSON file</small></button>
+    <button data-act="clear" class="danger">CLEAR DUMP<small>Delete unprocessed thoughts. DO, DEFER and DELEGATE are kept.</small></button>
+    <button data-act="restore" class="minor">Restore from a backup file</button>
+    <button data-act="close" class="close">Close</button>
+  </dialog>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+
+  <!-- Process: sort the dump -->
+  <section class="process" id="process" hidden>
+    <div class="capbar">
+      <div class="ptitle">PROCESS <span id="procLeft"></span></div>
+      <button class="textbtn" id="procDone">Done</button>
+    </div>
+    <ol id="procList"></ol>
+  </section>
+
+  <dialog class="ask" id="askDialog">
+    <p id="askText"></p>
+    <div class="askrow">
+      <button id="askCancel" class="textbtn">Cancel</button>
+      <button id="askOk" class="dumpbtn danger"></button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
