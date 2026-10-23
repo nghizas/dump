@@ -83,6 +83,20 @@
     </div>
   </dialog>
 
+  <!-- Schedule a DEFER item in Google Calendar -->
+  <dialog class="ask sched" id="schedDialog">
+    <p id="schedText"></p>
+    <label class="field">Date<input type="date" id="schedDate"></label>
+    <label class="field" id="schedTimeRow">Time<input type="time" id="schedTime"></label>
+    <div class="chips" id="schedDur">
+      <button data-mins="15">15m</button><button data-mins="30">30m</button><button data-mins="60">1h</button><button data-mins="120">2h</button><button data-mins="0">All day</button>
+    </div>
+    <div class="askrow">
+      <button id="schedCancel" class="textbtn" autofocus>Cancel</button>
+      <button id="schedGo" class="dumpbtn">Google Calendar</button>
+    </div>
+  </dialog>
+
   <div class="toast" id="toast"></div>
   <script src="app.js"></script>
 </body>

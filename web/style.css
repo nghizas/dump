@@ -118,6 +118,10 @@ body.readonly .orb { display: none; }
   width: 42px; height: 40px; border-radius: 12px;
   background: var(--card); border: 1px solid var(--line); color: var(--muted);
 }
+.checklist .calbtn.todo { color: var(--defer); border-color: rgba(255, 200, 107, .4); }
+.checklist time.unset { color: var(--defer); }
+.checklist time.set { color: var(--text); opacity: .75; }
+.checklist time.past { color: var(--danger); }
 .checklist .swapbtn.on { color: var(--text); border-color: var(--muted); }
 .checklist button:active { transform: scale(.95); }
 .moveto { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
@@ -228,6 +232,24 @@ dialog::backdrop { background: rgba(0, 0, 0, .55); }
 .acts [data-to="defer"] { color: var(--defer); }
 .acts [data-to="delegate"] { color: var(--delegate); }
 .acts [data-to="delete"] { color: var(--danger); }
+
+/* ---------- Schedule dialog ---------- */
+.sched p { font-size: 19px; font-weight: 600; }
+.field {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-top: 1px solid var(--line); color: var(--muted);
+}
+.field[hidden] { display: none; }
+.field input {
+  font: inherit; font-size: 17px; color: var(--text); color-scheme: dark;
+  background: var(--line); border: 0; border-radius: 10px; padding: 6px 10px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0 18px; border-top: 1px solid var(--line); }
+.chips button {
+  padding: 7px 12px; border-radius: 999px; font-size: 14px; font-weight: 600;
+  background: var(--line); color: var(--muted);
+}
+.chips button.on { background: var(--defer); color: var(--bg); }
 
 /* ---------- Confirm + toast ---------- */
 .ask {

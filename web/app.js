@@ -17,7 +17,8 @@ const EMPTY = {
 // ---------------------------------------------------------------------------
 // Storage
 // ---------------------------------------------------------------------------
-// db.items: [{ id, text, t, list }] oldest first. t is when it was dumped (ISO); list is one of LISTS.
+// db.items: [{ id, text, t, list, when? }] oldest first. t is when it was dumped (ISO); list is one of LISTS.
+// when = { date: 'YYYY-MM-DD', time: 'HH:MM' | '', mins } is set by scheduling a DEFER item ('' time = all day).
 let db = { items: [] };
 try {
   const saved = JSON.parse(localStorage.getItem(KEY));
@@ -113,18 +114,24 @@ function renderCloud(freshId) {
   }
 }
 
-// Oldest first. DONE removes the thought for good.
+// Oldest first. DEFER puts unscheduled thoughts on top, then scheduled ones by date. DONE removes the thought for good.
 function renderChecklist() {
   const list = $('checklist');
   list.dataset.list = view;
   list.replaceChildren();
-  for (const it of inList(view)) {
+  const items = inList(view);
+  if (view === 'defer') items.sort((a, b) => (a.when ? 1 : 0) - (b.when ? 1 : 0) || whenKey(a).localeCompare(whenKey(b)));
+  for (const it of items) {
     const li = document.createElement('li');
     const txt = document.createElement('div');
     txt.className = 'txt';
     txt.textContent = it.text;
     const time = document.createElement('time');
     time.textContent = stamp(it.t);
+    if (view === 'defer') {
+      time.className = it.when ? (whenKey(it) < nowKey() ? 'past' : 'set') : 'unset';
+      time.textContent = it.when ? whenLabel(it.when) + (time.className === 'past' ? ' · past' : '') : 'Not scheduled';
+    }
     txt.append(time);
     const swap = document.createElement('button');
     swap.className = 'swapbtn';
@@ -150,7 +157,16 @@ function renderChecklist() {
     done.onclick = () => removeRow(li, () => { db.items = db.items.filter(x => x.id !== it.id); });
     const row = document.createElement('div');
     row.className = 'row';
-    row.append(txt, swap, done);
+    row.append(txt);
+    if (view === 'defer') {
+      const cal = document.createElement('button');
+      cal.className = 'swapbtn calbtn' + (it.when ? '' : ' todo');
+      cal.setAttribute('aria-label', 'Schedule in Google Calendar');
+      cal.innerHTML = CAL_ICON;
+      cal.onclick = () => openSchedule(it);
+      row.append(cal);
+    }
+    row.append(swap, done);
     li.append(row, moveTo);
     list.append(li);
   }
@@ -167,11 +183,82 @@ function removeRow(li, change) {
 
 const SWAP_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg>';
 
+const CAL_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+
 const stamp = t => new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 function setView(list) {
   view = list;
   $('scroller').scrollTop = 0;
+  render();
+}
+
+// ---------------------------------------------------------------------------
+// Schedule a DEFER item: pick a time, then hand it to Google Calendar
+// ---------------------------------------------------------------------------
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const whenKey = it => it.when ? `${it.when.date}T${it.when.time || '00:00'}` : '';
+const nowKey = () => { const d = new Date(); return `${ymd(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+
+function whenLabel(w) {
+  const [y, m, d] = w.date.split('-').map(Number);
+  const [hh, mm] = (w.time || '00:00').split(':').map(Number);
+  const dt = new Date(y, m - 1, d, hh, mm);
+  const day = dt.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  return w.time ? `${day} · ${dt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : `${day} · all day`;
+}
+
+// Google Calendar's "new event" link: no login or API, the event opens pre-filled and you tap Save.
+// Times are local wall-clock times in your time zone (ctz); all-day events end the next day.
+function gcalUrl(text, w) {
+  const compact = s => s.replace(/[-:]/g, '');
+  let dates;
+  if (w.time) {
+    const [y, m, d] = w.date.split('-').map(Number);
+    const [hh, mm] = w.time.split(':').map(Number);
+    const end = new Date(y, m - 1, d, hh, mm + w.mins);
+    dates = `${compact(w.date)}T${compact(w.time)}00/${compact(ymd(end))}T${pad(end.getHours())}${pad(end.getMinutes())}00`;
+  } else {
+    const [y, m, d] = w.date.split('-').map(Number);
+    dates = `${compact(w.date)}/${compact(ymd(new Date(y, m - 1, d + 1)))}`;
+  }
+  const q = new URLSearchParams({
+    action: 'TEMPLATE', text, dates,
+    ctz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    details: 'Deferred from Dump',
+  });
+  return 'https://calendar.google.com/calendar/render?' + q;
+}
+
+let scheduling = null;
+let schedMins = 30;
+
+function openSchedule(it) {
+  scheduling = it;
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  $('schedText').textContent = it.text;
+  $('schedDate').value = it.when?.date || ymd(tomorrow);
+  $('schedTime').value = it.when ? it.when.time || '09:00' : '09:00';
+  setMins(it.when ? (it.when.time ? it.when.mins : 0) : 30);
+  $('schedDialog').showModal();
+}
+
+// 0 = all day.
+function setMins(m) {
+  schedMins = m;
+  for (const b of $('schedDur').children) b.classList.toggle('on', Number(b.dataset.mins) === m);
+  $('schedTimeRow').hidden = m === 0;
+}
+
+// Saves the time on the item and opens Google Calendar in a new tab (keeps Dump open behind it).
+function schedule() {
+  if (!$('schedDate').value) return toast('Pick a date');
+  const when = { date: $('schedDate').value, time: schedMins ? $('schedTime').value || '09:00' : '', mins: schedMins || 0 };
+  window.open(gcalUrl(scheduling.text, when), '_blank');
+  scheduling.when = when;
+  save();
+  $('schedDialog').close();
   render();
 }
 
@@ -299,7 +386,7 @@ async function exportLists() {
   if (!db.items.length) return toast('Nothing to export');
   const lists = {};
   for (const l of LISTS) {
-    const items = inList(l).map(({ id, text, t }) => ({ id, text, t }));
+    const items = inList(l).map(({ id, text, t, when }) => (when ? { id, text, t, when } : { id, text, t }));
     if (items.length) lists[l] = items;
   }
   const obj = { filename: `dump-${localDate()}.json`, app: 'dump', schema: SCHEMA, exportedAt: new Date().toISOString(), lists };
@@ -317,7 +404,7 @@ async function importFile(file) {
     let added = 0;
     for (const it of incoming) {
       if (!it?.text || have.has(it.id)) continue;
-      db.items.push({ id: it.id || newId(), text: String(it.text), t: it.t || new Date().toISOString(), list: it.list });
+      db.items.push({ id: it.id || newId(), text: String(it.text), t: it.t || new Date().toISOString(), list: it.list, ...(it.when && { when: it.when }) });
       added++;
     }
     db.items.sort((a, b) => a.t.localeCompare(b.t));
@@ -370,6 +457,9 @@ $('menu').addEventListener('click', e => {
 });
 $('importFile').addEventListener('change', e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; });
 $('procDone').addEventListener('click', closeProcess);
+$('schedDur').addEventListener('click', e => { const m = e.target.closest('button')?.dataset.mins; if (m) setMins(Number(m)); });
+$('schedGo').addEventListener('click', schedule);
+$('schedCancel').addEventListener('click', () => $('schedDialog').close());
 $('procBtn').addEventListener('click', () => { renderProcess(); $('process').hidden = false; });
 
 render();

@@ -4,6 +4,8 @@ A one-tap brain dump for iPhone. Your thoughts float in a cloud above a big circ
 
 **☰ top left** switches between **DUMP** (the default), **DO**, **DEFER** and **DELEGATE**. DUMP is a cloud of every thought and the only place you can add one. Unprocessed thoughts are lavender. Processed ones take their list's colour: green for DO, amber for DEFER, blue for DELEGATE. The other three lists are checklists, oldest first. **⇄** moves a thought to one of the other two lists. **DONE** removes it everywhere, cloud included.
 
+**DEFER is for things to schedule.** Each item has a **📅** button: pick a date, a time and a length (15m–2h or all day), then tap **Google Calendar**. A new tab opens Google Calendar with the event pre-filled; tap Save there, and Google Calendar handles the reminder. DEFER lists unscheduled items first (*Not scheduled*, in amber), then scheduled ones by date. Items whose date has passed stay in DEFER, marked *past*.
+
 **PROCESS** (top right, on DUMP, with the number left to sort) goes through unprocessed thoughts oldest first. Each thought has **DO / DEFER / DELEGATE / DELETE**. The first three move it to that list. DELETE removes it immediately, with no confirmation.
 
 **⚙ top right:**
@@ -36,10 +38,10 @@ When you change the app, bump `VERSION` in `web/sw.js`.
   "lists": {
     "dump":     [{ "id": "mh3k2x9ab", "text": "call mom", "t": "2026-10-23T19:40:12.000Z" }],
     "do":       [],
-    "defer":    [],
+    "defer":    [{ "id": "…", "text": "renew passport", "t": "…", "when": { "date": "2026-10-28", "time": "09:00", "mins": 30 } }],
     "delegate": []
   }
 }
 ```
 
-`t` is when the thought was dumped. Empty lists are left out of the export. Restore also accepts schema-1 files (`"items": [...]`) and puts them in the dump.
+`t` is when the thought was dumped. `when` appears on scheduled DEFER items. An empty `time` means all day. Empty lists are left out of the export. Restore also accepts schema-1 files (`"items": [...]`) and puts them in the dump.
