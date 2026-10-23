@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when you change files so phones pick up the update.
-const VERSION = 'dump-v7';
+const VERSION = 'dump-v8';
 const ASSETS = ['./', 'index.html', 'app.js', 'style.css', 'manifest.json', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
