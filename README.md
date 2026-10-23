@@ -2,7 +2,7 @@
 
 A one-tap brain dump for iPhone. Your thoughts float in a cloud above a big circle. Tap the circle, type one thought in big type, hit **Dump** (or Return), and the thought joins the cloud. Newer thoughts render bigger and brighter. Older ones shrink and fade.
 
-**☰ top left** switches between **DUMP** (the default), **DO**, **DEFER** and **DELEGATE**. DUMP is a cloud of every thought and the only place you can add one. Unprocessed thoughts are lavender. Processed ones take their list's colour: green for DO, amber for DEFER, blue for DELEGATE. The other three lists are checklists, oldest first. **⇄** moves a thought to one of the other two lists. **DONE** removes it everywhere, cloud included.
+**☰ top left** switches between **DUMP** (the default), **DO**, **DEFER** and **DELEGATE**. DUMP is a cloud of every thought and the only place you can add one. Unprocessed thoughts are lavender. Processed ones take their list's colour: green for DO, amber for DEFER, blue for DELEGATE. The other three lists are checklists, oldest first. Tap a thought's text to edit it; Return saves. **⇄** moves a thought to one of the other two lists. **DONE** removes it everywhere, cloud included.
 
 **DEFER is for things to schedule.** Each item has a **📅** button: pick a date, a time and a length (15m–2h or all day), then tap **Google Calendar**. A new tab opens Google Calendar with the event pre-filled; tap Save there, and Google Calendar handles the reminder. DEFER lists unscheduled items first (*Not scheduled*, in amber), then scheduled ones by date. Items whose date has passed stay in DEFER, marked *past*.
 

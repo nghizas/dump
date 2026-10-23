@@ -107,6 +107,11 @@ body.readonly .orb { display: none; }
 .checklist .row { display: flex; gap: 10px; align-items: center; }
 .checklist li.gone { opacity: 0; transform: translateX(40px); }
 .checklist .txt { flex: 1; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; overflow-wrap: anywhere; }
+.checklist .label {
+  display: block; outline: 0; border-radius: 8px; margin: -2px -6px; padding: 2px 6px;
+  -webkit-user-select: text; user-select: text; cursor: text;
+}
+.checklist .label:focus { background: var(--card); box-shadow: 0 0 0 1px var(--line); caret-color: var(--accent); }
 .checklist time { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
 .checklist .donebtn {
   padding: 10px 16px; border-radius: 12px;

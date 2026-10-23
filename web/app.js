@@ -125,7 +125,7 @@ function renderChecklist() {
     const li = document.createElement('li');
     const txt = document.createElement('div');
     txt.className = 'txt';
-    txt.textContent = it.text;
+    txt.append(editableLabel(it));
     const time = document.createElement('time');
     time.textContent = stamp(it.t);
     if (view === 'defer') {
@@ -170,6 +170,30 @@ function renderChecklist() {
     li.append(row, moveTo);
     list.append(li);
   }
+}
+
+// Tap the text to edit it in place. Return or tapping away saves; Escape or an empty edit puts the old text back.
+function editableLabel(it) {
+  const el = document.createElement('span');
+  el.className = 'label';
+  el.contentEditable = 'plaintext-only';
+  el.enterKeyHint = 'done';
+  el.spellcheck = true;
+  el.textContent = it.text;
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    if (e.key === 'Escape') { el.textContent = it.text; el.blur(); }
+  });
+  el.addEventListener('blur', () => {
+    const text = el.textContent.trim().replace(/\s+/g, ' ');
+    if (text && text !== it.text) {
+      it.text = text;
+      save();
+      toast('Saved');
+    }
+    el.textContent = it.text;
+  });
+  return el;
 }
 
 // Applies a change that takes the row off this list, then slides it out.
